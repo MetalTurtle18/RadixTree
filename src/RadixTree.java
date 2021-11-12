@@ -46,6 +46,28 @@ public class RadixTree {
                 Got:""");
 
         rt.print();
+
+        // ****************************************
+        // Test 2: Searching
+        // ****************************************
+        System.out.println("""
+                ****************************************
+                Test 2: Searching
+                ****************************************
+                Expected:
+                true
+                true
+                false
+                false
+                true
+                                
+                Got:""");
+        System.out.println(rt.search("apple"));
+        System.out.println(rt.search("apes"));
+        System.out.println(rt.search("ape"));
+        System.out.println(rt.search("apply"));
+        System.out.println(rt.search("app"));
+
     }
 
     /**
@@ -119,6 +141,29 @@ public class RadixTree {
      */
     public void removeRec(String str, RadixNode current) {
     }
+
+    /**
+     * Wrapper method for the recursive {@link #searchRec}
+     */
+    public boolean search(String str) {
+        return searchRec(str, root);
+    }
+
+    /**
+     * Recursively search the RadixTree for the inputted word
+     *
+     * @param str     the string to search for
+     * @param current the node to search from
+     */
+    public boolean searchRec(String str, RadixNode current) {
+        if (str == null || str.length() == 0) return false;
+        var node = current.children[str.charAt(0) - 97];
+        if (node == null) return false;
+        if (node.text.equals(str)) return node.isWord;
+        if (str.startsWith(node.text)) return searchRec(str.substring(node.text.length()), node);
+        return false;
+    }
+
 
     /**
      * Wrapper method for the recursive {@link #printRec}
