@@ -140,6 +140,35 @@ public class RadixTree {
      * @param current the node to remove the string from
      */
     public void removeRec(String str, RadixNode current) {
+        if(str == null || str.length() == 0) return; //If there is no string, finish
+        var node = current.children[str.charAt(0) - 97]; //Go to the first node corresponding to str input
+
+        if (node == null) return;
+
+        else if (node.text.equals(str)) {
+            int childrenCount = 0;
+            for (RadixNode item: current.children) { if (item != null) childrenCount++; }
+
+            if (childrenCount == 0)
+                node = null;
+            else if (childrenCount == 1) {
+                RadixNode childNode = root;
+                for(RadixNode child : node.children) {
+                    if (child != null)
+                        childNode = child;
+                }
+                node.text += childNode.text;
+                node.children = childNode.children;
+                node.isWord = childNode.isWord;
+
+            } else { node.isWord = false; }
+
+        } else if (str.startsWith(node.text)) {
+            removeRec(str.substring(node.text.length()), node);
+        }
+
+        else if(node.text.startsWith(str))
+            removeRec(str.substring(node.text.length()), node); //TODO finish
     }
 
     /**
