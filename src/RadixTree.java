@@ -1,69 +1,157 @@
 /**
- * A RadixTree, in layman's terms, is a compressed Trie
+ * A RadixTree
+ * <p>
+ * A RadixTree is a trie that compresses letters that have only one child. Its advantage over tries is that it saves space.
+ *
+ * @author Nick
+ * @author Dorian
+ * @author Jason
  */
 public class RadixTree {
-    RadixNode root; //Instance Variables
+    RadixNode root;
 
-    //Constructor
+    /**
+     * Constructor
+     */
     public RadixTree() {
         root = new RadixNode();
     }
 
     /**
-     * Functional Methods
+     * Main method to test the RadixTree
+     *
+     * @param args runtime arguments
      */
+    public static void main(String[] args) {
+        // ****************************************
+        // Test 1: Inserting, using all 5 insert cases
+        // ****************************************
+        var rt = new RadixTree();
+        rt.insert("apple"); // Case 1
+        rt.insert("apple"); // Case 2
+        rt.insert("apples"); // Case 3
+        rt.insert("app"); // Case 4
+        rt.insert("apes"); // Case 5
 
-    //Wrapper method for the recursive addRec()
-    public void add(String str) {
-        addRec(str, root);
+        System.out.println("""
+                ****************************************
+                Test 1: Inserting, using all 5 insert cases
+                ****************************************
+                Expected:
+                apes
+                app
+                apple
+                apples
+                                
+                Got:""");
+
+        rt.print();
     }
-    public void addRec(String str, RadixNode current) {
+
+    /**
+     * Wrapper method for the recursive {@link #insertRec}
+     *
+     * @param str the string to insert
+     */
+    public void insert(String str) {
+        insertRec(str, root);
+    }
+
+    /**
+     * Recursively insert the inputted word into the RadixTree
+     *
+     * @param str     the string to insert
+     * @param current the node to insert the string into
+     */
+    public void insertRec(String str, RadixNode current) {
         if (str == null || str.length() == 0) return;
         var node = current.children[str.charAt(0) - 97];
-        if (node == null) node = new RadixNode();
-        node.isWord = str.length() == 1 || node.isWord; // The || is to leave it a word if it already is a word
+        // 5 cases:
+        if (node == null) { // 1. Node doesn't exist
+            node = new RadixNode();
+            node.isWord = true;
+            node.text = str;
+        } else if (node.text.equals(str)) { // 2. Node is the same as the input
+            node.isWord = true;
+        } else if (str.startsWith(node.text)) { // 3. Node is a prefix
+            insertRec(str.substring(node.text.length()), node);
+        } else if (node.text.startsWith(str)) { // 4. Node is longer than the inserting string
+            var newChild = new RadixNode();
+            newChild.text = node.text.substring(str.length());
+            newChild.isWord = node.isWord;
+            newChild.children = node.children;
+            node.isWord = true;
+            node.text = str;
+            node.children = new RadixNode[26];
+            node.children[newChild.text.charAt(0) - 97] = newChild;
+        } else { // 5. Node starts the same as the inserting string, but they have different endings
+            var newChild = new RadixNode();
+            // Figure out the index of the first character that they differ
+            int i = 0;
+            while (node.text.charAt(i) == str.charAt(i)) i++;
+            newChild.text = node.text.substring(i);
+            newChild.isWord = node.isWord;
+            newChild.children = node.children;
+            node.isWord = false;
+            node.text = node.text.substring(0, i);
+            node.children = new RadixNode[26];
+            node.children[newChild.text.charAt(0) - 97] = newChild;
+            insertRec(str.substring(i), node);
+        }
         current.children[str.charAt(0) - 97] = node;
-        addRec(str.substring(1), node);
     }
 
-    //Wrapper method for the recursive removeRec()
+
+    /**
+     * Wrapper method for the recursive {@link #removeRec}
+     *
+     * @param str the string to remove
+     */
     public void remove(String str) {
         removeRec(str, root);
     }
 
     /**
-     * Recursively remove the inputted word from the RadixTree,
-     * Splitting and compressing as need be
+     * Recursively remove the inputted word from the RadixTree
+     *
+     * @param str     the string to remove
+     * @param current the node to remove the string from
      */
-    public void removeRec(String str, RadixNode current) {}
-
-    public void printRec(RadixNode current, String str) {
-        if (current == null)
-            return;
-        System.out.println(str);
-        for (char c = 'a'; c <= 'z'; c++)
-            printRec(current.children[c - 97], str + c);
+    public void removeRec(String str, RadixNode current) {
     }
 
-    //The main method is to be used for tests on the implementation of a RadixTree
-    public static void main(String[] args) {
-        RadixTree rt = new RadixTree();
-        rt.add("please");
-        rt.add("place");
-        rt.add("pleasure");
+    /**
+     * Wrapper method for the recursive {@link #printRec}
+     */
+    public void print() {
+        if (root != null)
+            printRec(root, "");
+    }
 
-        rt.printRec(rt.root, "");
+    /**
+     * Recursively print the RadixTree
+     *
+     * @param current the node to print
+     * @param str     the string to print
+     */
+    public void printRec(RadixNode current, String str) {
+        if (current.isWord)
+            System.out.println(str);
+        for (RadixNode node : current.children) {
+            if (node != null)
+                printRec(node, str + node.text);
+        }
     }
 
 }
 
 
 /**
- * A class for manipulating the nodes within the Radix Tree
+ * A class representing a node in the RadixTree
  */
 class RadixNode {
     RadixNode[] children;
-    String text; // If empty string, represents a single char. Otherwise, represents a group of characters
+    String text;
     boolean isWord;
 
     public RadixNode() {
