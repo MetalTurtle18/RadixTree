@@ -11,3 +11,5 @@ If a letter has only one child, that child can be added to the parent so that it
   * Used to get background information about how radix trees work.
 * https://iq.opengenus.org/radix-tree/
   * Used as a reference for writing the insert and search methods.
+* https://stackoverflow.com/questions/45684200/time-complexity-of-stream-filter
+  * Used as a reference for calculating Big O time complexity
